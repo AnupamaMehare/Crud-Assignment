@@ -1,0 +1,26 @@
+trigger checkDuplicateAccNameTrigger on Account (before insert, before update) {
+    Set<String> accountNameSet = new Set<String>();
+        Map<String,Account> accountMap = new Map<String,Account>();
+        for(Account objAccount : trigger.new){
+            if(String.isNotBlank(objAccount.Name)){
+                if(trigger.isInsert && trigger.isBefore){
+                    accountNameSet.add(objAccount.Name);
+                }
+                if(trigger.isUpdate && trigger.isBefore){
+                    if(objAccount.Name != trigger.oldMap.get(objAccount.Id).Name){
+                        accountNameSet.add(objAccount.Name);
+                    }
+                }
+            }
+        }
+            for(Account objAccount : [select Id, Name from Account where Name IN : accountNameSet]){
+                accountMap.put(objAccount.Name, objAccount);
+        }
+            for(Account objAccount : trigger.new){
+                if(accountMap.containsKey(objAccount.Name)){
+                    objAccount.addError('This Account is already Exists');
+                }
+        }
+}
+
+    
