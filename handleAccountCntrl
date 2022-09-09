@@ -1,0 +1,21 @@
+public with sharing class handleAccountCntrl {
+    @AuraEnabled(cacheable = true)
+    public static List<Account> getAccountDetails(){
+        List<Account> accList = [SELECT ID,Name,Phone,Type,Industry FROM Account];
+        System.debug(accList);
+        return accList;
+    }
+    @AuraEnabled
+    public static String deleteAccount(String accountName){
+        List<Account> acclist =[SELECT Id, Name FROM Account WHERE Name =: accountName];
+        try{
+            delete acclist;
+            return accountName;
+        }catch(Exception ex){
+            throw new AuraHandledException(ex.getMessage());
+        }
+    }
+
+
+}
+
